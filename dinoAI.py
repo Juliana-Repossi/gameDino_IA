@@ -11,6 +11,9 @@ GAME_MODE = "AI_MODE"
 #GAME_MODE = "HUMAN_MODE"
 RENDER_GAME = True
 
+#NUMERO DE 
+N_NEURONIOS = 4
+
 # Global Constants
 SCREEN_HEIGHT = 600
 SCREEN_WIDTH = 1100
@@ -203,12 +206,7 @@ class Bird(Obstacle):
         SCREEN.blit(self.image[self.index // 10], self.rect)
         self.index += 1
 
-# A classe “KeyClassifier” é uma interface que deve ser implementada por outra classe para o “AI_MODE” jogar. 
-# A função “keySelector” recebe as features e retorna “K_UP” (pular), “K_DOWN” (abaixar) e “K_NO” (noop).
-# A função “updateState” é opcional e depende das suas escolhas de código.
-# É possível demonstrar que um classificador ótimo pode ser feito sem que ele classifique “K_NO” em nenhum 
-# momento pois não existe diferença entre “K_NO” e “K_DOWN” em relação a pontuação, apenas informação visual.
-# Assim fica dispensada a utilização do “K_NO” nesse trabalho.
+
 class KeyClassifier:
     def __init__(self, state):
         pass
@@ -223,6 +221,7 @@ class KeyClassifier:
 def first(x):
     return x[0]
 
+
 # exemplo de implementação
 # distance - Distância do dino até o próximo obstáculo
 # obHeight - Altura do próximo obstáculo
@@ -236,18 +235,19 @@ class KeySimplestClassifier(KeyClassifier):
     def __init__(self, state):
         self.state = state
 
-    def keySelector(self, distance, obHeight, speed, obType, nextObDistance, nextObHeight,nextObType):
-        self.state = sorted(self.state, key=first)
-        for s, d in self.state:
-            if speed < s:
-                limDist = d
-                break
-        if distance <= limDist:
-            if isinstance(obType, Bird) and obHeight > 50:
-                return "K_DOWN"
-            else:
+    def keySelector(self, distance, obHeight, speed, obType):
+        
+        #implementação de redes neurais
+
+        #para cada neurônio
+        for i in range(N_NEURONIOS):
+
+
+        
+        if result <= 0:
+            return "K_DOWN"
+        else:
                 return "K_UP"
-        return "K_NO"
 
     def updateState(self, state):
         self.state = state
@@ -422,6 +422,73 @@ def gradient_ascent(state, max_time):
                 better = True
         end = time.process_time()
     return state, max_value
+
+
+def convergent(population):
+    conv = False
+    if population != []:
+        base = population[0]
+        i = 0
+        while i < len(population):
+            if base != population[i]:
+                return False
+            i += 1
+        return True
+
+import math
+
+def elitism (val_pop, pct):
+    n = math.floor((pct/100)*len(val_pop))
+    if n < 1:
+        n = 1
+    val_elite = sorted (val_pop, key = first, reverse = True)[:n]
+    elite = [s for v,s in val_elite]
+    return elite
+
+# Algoritmo genético
+def alg_genetic ():
+
+    start = time.process_time()
+    #inicializa o vetor de itens(atd de items)
+    opt_state = [0] * len(items)
+    opt_value = 0
+    #gerar um valor inicial de pesos
+    pop = initial_population(pop_size, max_size, items)
+    #verificar a convergencia
+    conv = convergent(pop)
+    iter = 0    
+    end = 0
+
+    while not conv and iter < max_iter and end-start <= max_time:
+        
+        #fazer o calculo do resultado - jogar - array de scores (entrada , score)
+        val_pop = evaluate_population (pop, items)
+        #porcentagem da população com os melhores valores (so a entrada)
+        new_pop = elitism (val_pop, elite_pct)
+        #melhores dados
+        best = new_pop[0]
+        #melhor score
+        val_best = evaluate_state(best, items)
+
+        #guarda os melhores valores
+        if (val_best > opt_value):
+            opt_state = best
+            opt_value = val_best
+
+        #gerando automaticamente os demais valores
+        selected = selection(val_pop, pop_size - len(new_pop)) 
+        # faz o cross over
+        crossed = crossover_step(selected, cross_ratio, max_size, items)
+        #aplica mutação
+        mutated = mutation_step(crossed, mut_ratio, max_size, items)
+        pop = new_pop + mutated
+        conv = convergent(pop)
+        iter+=1
+        end = time.process_time()
+        
+  
+    return opt_state, state_size(opt_state, items), opt_value, iter, conv
+
 
 
 from scipy import stats
