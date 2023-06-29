@@ -12,7 +12,7 @@ pygame.init()
 # Valid values: HUMAN_MODE or AI_MODE
 GAME_MODE = "AI_MODE"
 #GAME_MODE = "HUMAN_MODE"
-RENDER_GAME = True
+RENDER_GAME = False
 
 # Global Constants
 #NUMERO DE NEURÔNIOS - CARACTERISTICAS
@@ -219,47 +219,44 @@ class KeyClassifier:
     def updateState(self, state):
         pass
 
-
-def first(x):
-    return x[0]
-
 class alg_genetic:
-    def __init__(self,qtd_weights, max_iter, qtd_generation, percent_selection,percent_cross, percent_mutation):
-        self.qtd_weights = qtd_weights
-        self.best_score = 0
-        self.best_weights = []
-        self.time_max = 43200 #12 horas
+    def __init__(self,size, max_iter, qtd_generation, percent_selection,percent_cross, percent_mutation):
+        self.size = size
         self.max_iter = max_iter
         self.qtd_generation = qtd_generation
+        self.time_max = 43200 #12 horas
+        
         self.percent_selection = percent_selection
-        self.tam = self.qtd_weights**2 + self.qtd_weights
         self.percent_cross = percent_cross
         self.percent_mutation = percent_mutation
 
+        self.best_score = 0
+        self.best_weights = []
+
     def convergent(self,list_weights):
         conv = False
-        if list_weights != []:
+        if len(list_weights) != 0:
             base = list_weights[0]
             i = 1
-            while i < self.qtd_weights:
+            while i < len(list_weights):
                 if (base != list_weights[i]).any:
                     return False
                 i += 1
             return True
 
     def elitism (self, results):
-        n = math.floor((self.percent_selection/100)*len(self.qtd_generation))
+        n = math.floor((self.percent_selection)*self.qtd_generation)
         if n < 1:
             n = 1
-        bests = sorted (results, key = first, reverse = True)[:n]
-        best_score,best_weights = best[0]
-        elite = [v for s,v in best]
+        bests = sorted (results, reverse = True)[:n]
+        best_score,best_weights = bests[0]
+        elite = [v for s,v in bests]
         return elite,best_score,best_weights
 
-    def crossover(dad,mom):
-        r = random.randint(0, len(dad) - 1)
-        son = dad[:r]+mom[r:]
-        daug = mom[:r]+dad[r:]
+    def crossover(self,dad,mom):
+        r = random.randint(2, len(dad) - 1)
+        son = np.concatenate([dad[:r], mom[r:]])
+        daug = np.concatenate([mom[:r], dad[r:]])
         return son, daug
 
     def crossover_weights (self, list_weights):
@@ -270,30 +267,33 @@ class alg_genetic:
             #sorteando um lista de pesos para sofrer cross
             fst_ind = random.randint(0, len(list_weights) - 1)
             scd_ind = random.randint(0, len(list_weights) - 1)
+
             parent1 = list_weights[fst_ind] 
             parent2 = list_weights[scd_ind]
 
-            ##### ???????????
-            if rand <= self.taxa_cross:
-                parent1, parent2 = crossover(parent1, parent2)            
-    
+            if fst_ind != scd_ind and rand <= self.percent_cross:
+
+                parent1, parent2 = self.crossover(parent1, parent2)            
+        
             new_weights = new_weights + [parent1, parent2]
+
+        #manter o tamanho da amostra
+        for i in range(len(list_weights)-len(new_weights)):
+          ind = random.randint(0, len(list_weights) - 1)
+          new_weights = new_weights + [list_weights[ind]]
             
         return new_weights
 
-    def mutation (weights):
+    def mutation (self, weights):
         copy_weights = weights.copy()
         rand = random.randint(0, len(copy_weights) - 1)
         
-        if copy_weights[rand] > 0:
-            r = random.uniform(0,1)
-            if r > 0.5:
-                copy_weights[rand] = copy_weights[rand] + 1
-            else:
-                copy_weights[rand] = copy_weights[rand] - 1
-        else:
+        r = random.uniform(0,1)
+        if r > 0.5:
             copy_weights[rand] = copy_weights[rand] + 1
-            
+        else:
+                copy_weights[rand] = copy_weights[rand] - 1
+                    
         return copy_weights
 
     def mutation_weights (self, list_weights):
@@ -302,9 +302,8 @@ class alg_genetic:
             rand = random.uniform(0, 1)
 
             if rand <= self.percent_mutation:
-                mutated = mutation(weights)
-                if state_size(mutated, items) <= max_size:
-                    list_weights[ind] = mutated
+                mutated = self.mutation(weights)
+                list_weights[ind] = mutated
                     
             ind+=1
             
@@ -319,10 +318,13 @@ class alg_genetic:
 
         global aiPlayer
 
-        #inicializa um vetor inicial de pesos aleatoriamente // qtd de pesos é n³
-        list_weights = np.random.randint(0, 1000, (self.qtd_generation,self.tam))
+        #inicializa "qtd_generation" vetores iniciais de "size" pesos aleatoriamente 
+        list_weights = np.random.randint(-100000, 100000, (self.qtd_generation,self.size))
+        row = np.array([-22737,90174,87735,63928,25547,27466,-20881,60871,99506,-69390,90753,71780,38364,-40811,30997,15471,73227,-18762,-18436,72347])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([20768,-49186,87276,-73384,-22197,-93837,-70897,-72445,-19520,-34456,98639,-66826,76174,56090,22466,57171,-35468,11595,42991,22526])
+        list_weights = np.r_[list_weights,[row]]
 
-        print(list_weights)
         #verificar a convergencia
         conv = self.convergent(list_weights)
         
@@ -332,13 +334,13 @@ class alg_genetic:
             
             for weights in list_weights:
                 
-                #testar combinações geradas --> jogar --> array de scores (score , pesos)
+                #testar combinações geradas --> jogar --> array de scores (score, peso)
                 aiPlayer = KeySimplestClassifier(weights)
                 res, score = manyPlaysResults(3)
-                results += (score,weights)
+                results += [(score,weights)]
 
             #porcentagem da população com os melhores valores 
-            elite, best_score, best_weights = elitism(results)
+            elite, best_score, best_weights = self.elitism(results)
 
             #guarda os melhores valores
             if (best_score > self.best_score):
@@ -346,18 +348,16 @@ class alg_genetic:
                 self.best_weights = best_weights
 
             #gerando automaticamente os valores faltantes para compor a prox exec !!!!!!!FEZ COM ROLETA ????
-            selection = np.random.randint(0, 1000, (self.qtd_generation - len(elite),self.tam))
+            selection = np.random.randint(-100000, 100000, (self.qtd_generation - len(elite),self.size))
             # faz o cross over - duvida na taxa
-            crossed = crossover(selected)
+            crossed = self.crossover_weights(selection)
             #aplica mutação
-            mutated = mutation_step(crossed)
+            mutated = self.mutation_weights(crossed)
             list_weights = elite + mutated
             conv = self.convergent(list_weights)
             iter+=1
             end = time.process_time()
-        
-        return best_score, best_weights
-
+    
 
 # exemplo de implementação
 # distance - Distância do dino até o próximo obstáculo
@@ -377,17 +377,20 @@ class KeySimplestClassifier(KeyClassifier):
         result = 0
         
         #implementação de redes neurais
-        for i in range(N_NEURONIOS):
-            valor_neuronios[i] = distance*self.state[i*N_NEURONIOS+0] + obHeight*self.state[i*N_NEURONIOS+1] + speed*self.state[i*N_NEURONIOS+2] + obType*self.state[i*N_NEURONIOS+3]          
+        for i in range(self.neuronios):
+            valor_neuronios.append(distance * self.state[i*self.neuronios+0] + obHeight * self.state[i*self.neuronios+1] + speed * self.state[i*self.neuronios+2] + obType * self.state[i*self.neuronios+3])
+
+        i=0
 
         #para cada neurônio
-        for i in range(N_NEURONIOS):
-            result = result + valor_neuronios[i]*self.state[N_NEURONIOS*N_NEURONIOS + i]
+        for valor in valor_neuronios:
+            result = result + valor*self.state[self.neuronios**2 + i]
+            i+=1
        
         if result <= 0:
             return "K_DOWN"
         else:
-                return "K_UP"
+            return "K_UP"
 
     def updateState(self, state):
         self.state = state
@@ -475,7 +478,16 @@ def playGame():
         if GAME_MODE == "HUMAN_MODE":
             userInput = playerKeySelector()
         else:
-            userInput = aiPlayer.keySelector(distance, obHeight, game_speed, obType)
+
+            #aplicar transformação de valor nominal para ordinal no obType            
+            if isinstance(obType, Bird):
+                userInput = aiPlayer.keySelector(distance, obHeight, game_speed, 20)
+            elif isinstance(obType, SmallCactus):
+                userInput = aiPlayer.keySelector(distance, obHeight, game_speed, 10)
+            elif isinstance(obType, LargeCactus):
+                userInput = aiPlayer.keySelector(distance, obHeight, game_speed, 11)
+            else:
+                userInput = aiPlayer.keySelector(distance, obHeight, game_speed, obType)
 
         if len(obstacles) == 0 or obstacles[-1].getXY()[0] < spawn_dist:
             spawn_dist = random.randint(0, 670)
@@ -528,41 +540,6 @@ def change_state(state, position, vs, vd):
     return aux[:position] + [(ns, nd)] + aux[position + 1:]
 
 
-# Neighborhood
-def generate_neighborhood(state):
-    neighborhood = []
-    state_size = len(state)
-    for i in range(state_size):
-        ds = random.randint(1, 10)
-        dd = random.randint(1, 100)
-        new_states = [change_state(state, i, ds, 0), change_state(state, i, (-ds), 0), change_state(state, i, 0, dd),
-                      change_state(state, i, 0, (-dd))]
-        for s in new_states:
-            if s != []:
-                neighborhood.append(s)
-    return neighborhood
-
-
-# Gradiente Ascent
-def gradient_ascent(state, max_time):
-    start = time.process_time()
-    res, max_value = manyPlaysResults(3)
-    better = True
-    end = 0
-    while better and end - start <= max_time:
-        neighborhood = generate_neighborhood(state)
-        better = False
-        for s in neighborhood:
-            aiPlayer = KeySimplestClassifier(s)
-            res, value = manyPlaysResults(3)
-            if value > max_value:
-                state = s
-                max_value = value
-                better = True
-        end = time.process_time()
-    return state, max_value
-
-
 # roda o jogo varias vezes para medir o resultado
 def manyPlaysResults(rounds):
     results = []
@@ -580,7 +557,13 @@ def manyPlaysResults(rounds):
 def main():
 
     #heurística buscando o melhor resultado
-    metah_genetic = alg_genetic(N_NEURONIOS, 5000, 5, 0.5,0.6, 0.2)
-    best_score, best_weights = metah_genetic.metaheuristica_genetic()
+    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 100000, 1500, 0.4, 0.9, 0.15)
+    meta_alg_genetic.metaheuristica_genetic()
+    print(meta_alg_genetic.best_score)
+    print(meta_alg_genetic.best_weights)
+    # aiPlayer = KeySimplestClassifier(meta_alg_genetic.best_weights)
+    # res, score = manyPlaysResults(3)
+    # print(res)
+    # print(score)
 
 main()
