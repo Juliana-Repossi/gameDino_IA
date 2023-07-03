@@ -3,16 +3,18 @@ import os
 import random
 import time
 from sys import exit
+import math
 
 pygame.init()
 
 # Valid values: HUMAN_MODE or AI_MODE
 GAME_MODE = "AI_MODE"
-RENDER_GAME = True
+RENDER_GAME = False
 
 # Global Constants
 SCREEN_HEIGHT = 600
 SCREEN_WIDTH = 1100
+N_NEURONIOS = 4
 if RENDER_GAME:
     SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -211,33 +213,285 @@ class KeyClassifier:
     def __init__(self, state):
         pass
 
-    def keySelector(self, distance, obHeight, speed, obType, nextObDistance, nextObHeight, nextObType):
+    def keySelector(self, distance, obHeight, speed, obType):
         pass
 
     def updateState(self, state):
         pass
 
-
 def first(x):
-    return x[0]
+    score,weights = x
+    return score
 
+class alg_genetic:
+    def __init__(self,size, max_iter, qtd_generation, percent_selection,percent_cross, percent_mutation):
+        self.size = size
+        self.max_iter = max_iter
+        self.qtd_generation = qtd_generation
+        # self.time_max = 43200 #12 horas
+        self.time_max = 1800
+        
+        self.percent_selection = percent_selection
+        self.percent_cross = percent_cross
+        self.percent_mutation = percent_mutation
+
+        self.best_score = 0
+        self.best_weights = []
+
+    def convergent(self,list_weights):
+        conv = False
+        if len(list_weights) != 0:
+            base = list_weights[0]
+            i = 1
+            while i < len(list_weights):
+                if (base != list_weights[i]).any:
+                    return False
+                i += 1
+            return True
+
+    def elitism (self, results):
+        n = math.floor((self.percent_selection)*len(results))
+        if n < 1:
+            n = 1
+        bests = sorted (results,key=first, reverse = True)[:n]
+        best_score,best_weights = bests[0]
+        elite = [v for s,v in bests]
+        return elite,best_score,best_weights
+
+    def scores_total_value(self,results_weights):
+        total_scores = 0
+        for score,weights in results_weights:
+            if score < 0:
+                score = 0
+            total_scores = total_scores + score
+        return total_scores
+
+    def roulette_construction(self,results_weights):
+        aux_states = []
+        roulette = []
+        total_value = self.scores_total_value(results_weights)
+
+        for score,weights in results_weights:
+            if score <= 0:
+                #não é permanecer resultado negativo 
+                continue
+            
+            value = score
+            ratio = value/total_value
+            
+            aux_states.append((ratio,weights))
+    
+        acc_value = 0
+        for score,weights in aux_states:
+            acc_value = acc_value + score
+            s = (acc_value,weights)
+            roulette.append(s)
+        return roulette
+    
+    def roulette_run (self,rounds, roulette):
+        if roulette == []:
+            return []
+        selected = []
+        while len(selected) < rounds:
+            r = random.uniform(0,1)
+            for space,weights in roulette:
+                if r <= space:
+                    selected.append(weights)
+                    break
+        return selected
+    
+    def selection(self,results_weights,n):
+        aux_population = self.roulette_construction(results_weights)
+        new_population = self.roulette_run(n, aux_population)
+        return new_population
+
+    def crossover(self,dad,mom):
+        r = random.randint(2, len(dad) - 1)
+        son = np.concatenate([dad[:r], mom[r:]])
+        daug = np.concatenate([mom[:r], dad[r:]])
+        return son, daug
+
+    def crossover_weights (self, list_weights):
+        new_weights = []
+        
+        for _ in range (round(len(list_weights)/2)):
+            rand = random.uniform(0, 1)
+            #sorteando um lista de pesos para sofrer cross
+            fst_ind = random.randint(0, len(list_weights) - 1)
+            scd_ind = random.randint(0, len(list_weights) - 1)
+
+            parent1 = list_weights[fst_ind] 
+            parent2 = list_weights[scd_ind]
+
+            if fst_ind != scd_ind and rand <= self.percent_cross:
+
+                parent1, parent2 = self.crossover(parent1, parent2)            
+        
+            new_weights = new_weights + [parent1, parent2]
+
+        #manter o tamanho da amostra
+        for i in range(len(list_weights)-len(new_weights)):
+          ind = random.randint(0, len(list_weights) - 1)
+          new_weights = new_weights + [list_weights[ind]]
+            
+        return new_weights
+
+    def mutation (self, weights):
+        copy_weights = weights.copy()
+        rand = random.randint(0, len(copy_weights) - 1)
+        
+        r = random.uniform(0,1)
+        if r > 0.5:
+            copy_weights[rand] = copy_weights[rand] + 500
+        else:
+            copy_weights[rand] = copy_weights[rand] * -1
+                    
+        return copy_weights
+
+    def mutation_weights (self, list_weights):
+        ind = 0
+        for weights in list_weights:
+            rand = random.uniform(0, 1)
+
+            if rand <= self.percent_mutation:
+                mutated = self.mutation(weights)
+                list_weights[ind] = mutated
+                    
+            ind+=1
+            
+        return list_weights   
+
+    def metaheuristica_genetic(self):
+
+        #valores de iteração
+        start = time.process_time()
+        #iter = 0    
+        end = 0
+
+        global aiPlayer
+
+        
+
+        #inicializa um vetor inicial com valores aleatórios e valores bons ja encontrados
+        list_weights = np.random.randint(-10000000, 10000000, (self.qtd_generation,self.size))
+        row = np.array([-5265029 ,2188768 ,-6234236 ,-1470275, -8670751,  -523049 , 4247573 , 3147815, -6316824 , 8113478 , 8175472 , 4046367 , -648623, -1677509 ,-8545026,  3753660, -7028417 , 1663771 , 5357043 ,-2024439])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([ 53203,87769,-70820, -38568, -89270 , 31891 ,-74788,  80053 , 59164 , 12082,  51492, -60877 , 96562, -9793 ,-64101, -87823 ,  5819 ,-35503 , 22373 ,-52886])
+        list_weights = np.r_[list_weights,[row]]
+        # row = np.array([ 53203 , 87769, -70820, -38568 ,-89272 , 31891, -74789 , 80051 , 59169 , 12002,  51489, -60877 , 96557 , -9792, -64101, -87875 ,  5813, -35509 , 22372, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([ 53203,87769,-70820, -38569, -89270 , 31891 ,-74788,  80053 , 59164 , 12082,  51492, -60887 , 96562, -9793 ,-64101, -87823 ,  5819 ,-35503 , 22373 ,-52886])
+        # # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([ 53203 , 87769, -70820, -38568 ,-89272 , 31891, -74789 , 80055 , 59169 , 12002,  51489, -60877 , 96557 , -9792, -64101, -87875 ,  5813, -35509 , 22372, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([ 53204,87765,-70820 ,-38566 ,-89275,  31896, -74789,  80050 , 59171 , 12006, 51487 ,-60878,  96550,-9793 ,-64096 ,-87874,   5817, -35510,  22372, -52880])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([ 53201,87769,-70821, -38567, -89272 , 31893 ,-74789 , 80050 , 59165 , 12001, 51495 ,-60875 , 96553 , -9792 ,-64102,-87823, 5816,-35509,22374,52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202,87769,-70820,-38566,-89271,31893,-74790,80049,59168,12001,51492,-60876,96552,-9792,-64101,-87823,5815,-35509,22374,-52884])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([ 53203,87770,-70823,-38568,-89271,31893,-74790,80050,59168,12001,51494,-60875,96556,-9792,-64098,-87826, 5814,-35510,22374,-52886])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87769, -70821, -38566, -89272, 31893, -74789, 80050, 59167, 12002, 51494, -60876,  96557,  -9792, -64101, -87824,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87770, -70821, -38566, -89272, 31893, -74789, 80050, 59167, 12002, 51494, -60876,  96557,  -9792, -64101, -87824,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87769, -70821, -38566, -89275, 31893, -74789, 80050, 59167, 12002, 51494, -60876,  96557,  -9792, -64101, -87824,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87769, -70821, -38566, -89272, 31893, -74789, 80057, 59167, 12002, 51494, -60876,  96557,  -9792, -64101, -87824,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87769, -70821, -38566, -89272, 31893, -74789, 80050, 59167, 12002, 51490, -60876,  96557,  -9792, -64101, -87824,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87769, -70821, -38566, -89272, 31893, -74789, 80050, 59167, 12002, 51494, -60876,  96557,  -9782, -64101, -87824,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87769, -70821, -38566, -89272, 31893, -74789, 80050, 59167, 12002, 51494, -60876,  96557,  -9792, -64101, -87874,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87769, -70821, -38566, -89272, 31893, -74789, 80050, 59167, 12002, 51494, -60876,  96557,  -9792, -64101, -87824,   5816, -35509,  22388, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87769, -70821, -38566, -89272, 31893, -74789, 80050, 59167, 12002, 51494, -60876,  96557,  -9792, -64101, -87824,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87769, -70821, -38566, -89272, 31893, -74783, 80050, 59167, 12002, 51494, -60876,  96552,  -9792, -64101, -87824,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87762, -70825, -38566, -89272, 31893, -74789, 80050, 59167, 12002, 51494, -60876,  96557,  -9792, -64101, -87824,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([52202, 87769, -70821, -38566, -89272, 31893, -74789, 80050, 59167, 12082, 51494, -60876,  96567,  -9792, -64101, -87824,   5816, -35509,  22374, -52885])
+        # list_weights = np.r_[list_weights,[row]]
+        # row = np.array([53202, 87769, -70821, -38566, -89272, 31893, -74789, 80050, 59167, 12002, 51494, -60876,  96557,  -9792, -64101, -85824,   5816, -35509,  22374, -52385])
+        # list_weights = np.r_[list_weights,[row]]
+        
+        #verificar a convergencia
+        #conv = self.convergent(list_weights)
+        
+        #while not conv and iter < self.max_iter and end-start <= self.time_max:
+        while end-start <= self.time_max:
+            score = []
+
+            score = playGame(list_weights)
+            #print(score)
+
+            i=0
+            results = []
+                        
+            for weights in list_weights:
+                
+                #concatenar resultado e pesos
+                results += [(score[i],weights)]
+                i +=1
+                
+
+            #porcentagem da população com os melhores valores 
+            elite, best_score, best_weights = self.elitism(results)
+
+            #guarda os melhores valores
+            if (best_score > self.best_score):
+                self.best_score = best_score
+                self.best_weights = best_weights
+
+            # faz a seleção
+            selections = self.selection(results, self.qtd_generation - len(elite))
+            # faz o cross over 
+            crossed = self.crossover_weights(selections)
+            #aplica mutação
+            mutated = self.mutation_weights(crossed)
+            list_weights = elite + mutated
+            #conv = self.convergent(list_weights)
+            #iter+=1
+            end = time.process_time()
+    
+
+
+# exemplo de implementação
+# distance - Distância do dino até o próximo obstáculo
+# obHeight - Altura do próximo obstáculo
+# speed - Velocidade atual do jogo
+# obType - Tipo de obstáculo que pode ser SmallCactus, LargeCactus ou Bird 
+#           tendo este último três variações de altura baixo,médio e alto.
 
 class KeySimplestClassifier(KeyClassifier):
     def __init__(self, state):
         self.state = state
+        self.neuronios = N_NEURONIOS
 
-    def keySelector(self, distance, obHeight, speed, obType, nextObDistance, nextObHeight,nextObType):
-        self.state = sorted(self.state, key=first)
-        for s, d in self.state:
-            if speed < s:
-                limDist = d
-                break
-        if distance <= limDist:
-            if isinstance(obType, Bird) and obHeight > 50:
-                return "K_DOWN"
-            else:
-                return "K_UP"
-        return "K_NO"
+    def keySelector(self, distance, obHeight, speed, obType):
+
+        valor_neuronios = []
+        result = 0
+        
+        #implementação de redes neurais
+        for i in range(self.neuronios):
+            valor_neuronios.append(distance * self.state[i*self.neuronios+0] + obHeight * self.state[i*self.neuronios+1] + speed * self.state[i*self.neuronios+2] + obType * self.state[i*self.neuronios+3])
+
+        i=0
+
+        #para cada neurônio
+        for valor in valor_neuronios:
+            result = result + valor*self.state[self.neuronios**2 + i]
+            i+=1
+       
+        if result <= 0:
+            return "K_DOWN"
+        else:
+            return "K_UP"
 
     def updateState(self, state):
         self.state = state
@@ -341,7 +595,22 @@ def playGame(solutions):
                     nextObHeight = obstacles[1].getHeight()
                     nextObType = obstacles[1]
 
-                userInput = players_classifier[i].keySelector(distance, obHeight, game_speed, obType, nextObDistance, nextObHeight,nextObType)
+                #aplicar transformação de valor nominal para ordinal no obType            
+                if isinstance(obType, Bird) and obHeight > 40:
+                    userInput = players_classifier[i].keySelector(distance, obHeight, game_speed, -700)
+
+                elif isinstance(obType, Bird) and obHeight <= 40:
+                    userInput = players_classifier[i].keySelector(distance, obHeight, game_speed, 0)
+
+                elif isinstance(obType, SmallCactus):
+                    userInput = players_classifier[i].keySelector(distance, obHeight, game_speed, 0)
+
+                elif isinstance(obType, LargeCactus):
+                    userInput = players_classifier[i].keySelector(distance, obHeight, game_speed, 0)
+
+                else:
+                    userInput = players_classifier[i].keySelector(distance, obHeight, game_speed, obType)
+               
 
                 player.update(userInput)
 
@@ -385,61 +654,6 @@ def playGame(solutions):
     return solution_fitness
 
 
-# Change State Operator
-def change_state(state, position, vs, vd):
-    aux = state.copy()
-    s, d = state[position]
-    ns = s + vs
-    nd = d + vd
-    if ns < 15 or nd > 1000:
-        return []
-    return aux[:position] + [(ns, nd)] + aux[position + 1:]
-
-
-# Neighborhood
-def generate_neighborhood(state):
-    neighborhood = []
-    state_size = len(state)
-    for i in range(state_size):
-        ds = random.randint(1, 10)
-        dd = random.randint(1, 100)
-        new_states = [change_state(state, i, ds, 0), change_state(state, i, (-ds), 0), change_state(state, i, 0, dd),
-                      change_state(state, i, 0, (-dd))]
-        for s in new_states:
-            if s != []:
-                neighborhood.append(s)
-    return neighborhood
-
-
-# Gradiente Ascent
-def gradient_ascent(state, max_time):
-    start = time.process_time()
-    res, max_value = manyPlaysResultsTest(3, state)
-    better = True
-    end = 0
-    while better and end - start <= max_time:
-        neighborhood = generate_neighborhood(state)
-        better = False
-
-        results = playGame(neighborhood)
-        for i,value in enumerate(results):
-            if value > max_value:
-                state = neighborhood[i]
-                max_value = value
-                better = True
-        '''
-        for s in neighborhood:
-            aiPlayer = KeySimplestClassifier(s)
-            res, value = manyPlaysResults(3)
-            if value > max_value:
-                state = s
-                max_value = value
-                better = True
-        '''
-        end = time.process_time()
-    return state, max_value
-
-
 from scipy import stats
 import numpy as np
 
@@ -466,11 +680,15 @@ def manyPlaysResultsTest(rounds,best_solution):
 
 def main():
 
-    initial_state = [(15, 250), (18, 350), (20, 450), (1000, 550)]
-    best_state, best_value = gradient_ascent(initial_state, 5000)
-    res, value = manyPlaysResultsTest(30, best_state)
-    npRes = np.asarray(res)
-    print(res, npRes.mean(), npRes.std(), value)
+    #inicializando a heurística (size,max_iter,qtd_gerac,selecao,crossfit,mutação)
+    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 0, 1000, 0.2, 0.9, 0.9)
+    meta_alg_genetic.metaheuristica_genetic()
+    print(meta_alg_genetic.best_score)
+    print(meta_alg_genetic.best_weights)
 
+    # aiPlayer = KeySimplestClassifier(meta_alg_genetic.best_weights)
+    # res, score = manyPlaysResults(3)
+    # print(res)
+    # print(score)
 
 main()
