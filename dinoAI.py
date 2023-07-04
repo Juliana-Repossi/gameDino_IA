@@ -229,7 +229,7 @@ class alg_genetic:
         self.max_iter = max_iter
         self.qtd_generation = qtd_generation
         # self.time_max = 43200 #12 horas
-        self.time_max = 90000 
+        self.time_max = 300
         
         self.percent_selection = percent_selection
         self.percent_cross = percent_cross
@@ -365,7 +365,7 @@ class alg_genetic:
 
         #valores de iteração
         start = time.process_time()
-        iter = 0    
+        #iter = 0    
         end = 0
 
         global aiPlayer
@@ -417,21 +417,25 @@ class alg_genetic:
         row = np.array([53202, 87769, -70821, -38566, -89272, 31893, -74789, 80050, 59167, 12002, 51494, -60876,  96557,  -9792, -64101, -85824,   5816, -35509,  22374, -52385])
         list_weights = np.r_[list_weights,[row]]
         
-
         #verificar a convergencia
-        conv = self.convergent(list_weights)
+        #conv = self.convergent(list_weights)
         
-        while not conv and iter < self.max_iter and end-start <= self.time_max:
+        #while not conv and iter < self.max_iter and end-start <= self.time_max:
+        while end-start <= self.time_max:
+            score = []
 
+            score = playGame(list_weights)
+
+            i=0
             results = []
-            
+                        
             for weights in list_weights:
                 
-                #testar combinações geradas --> jogar --> array de scores (score, peso)
-                aiPlayer = KeySimplestClassifier(weights)
-                res, score = manyPlaysResults(3)
-                results += [(score,weights)]
-                #print(score)
+                #concatenar resultado e pesos
+                results += [(score[i],weights)]
+                i +=1
+                
+            print(results)
 
             #porcentagem da população com os melhores valores 
             elite, best_score, best_weights = self.elitism(results)
@@ -630,16 +634,6 @@ def playGame():
                 return points
 
 
-# Change State Operator
-def change_state(state, position, vs, vd):
-    aux = state.copy()
-    s, d = state[position]
-    ns = s + vs
-    nd = d + vd
-    if ns < 15 or nd > 1000:
-        return []
-    return aux[:position] + [(ns, nd)] + aux[position + 1:]
-
 
 # roda o jogo varias vezes para medir o resultado
 def manyPlaysResults(rounds):
@@ -652,7 +646,7 @@ def manyPlaysResults(rounds):
 def main():
 
     #inicializando a heurística (size,max_iter,qtd_gerac,selecao,crossfit,mutação)
-    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 50000, 0, 0.2, 0.9, 0.2)
+    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 200, 100, 0.2, 0.9, 0.2)
     meta_alg_genetic.metaheuristica_genetic()
     print(meta_alg_genetic.best_score)
     print(meta_alg_genetic.best_weights)
