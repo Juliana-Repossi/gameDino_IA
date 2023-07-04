@@ -364,7 +364,7 @@ class alg_genetic:
 
         #valores de iteração
         start = time.process_time()
-        #iter = 0    
+        iter = 0    
         end = 0        
 
         #inicializa um vetor inicial com valores aleatórios e valores bons ja encontrados
