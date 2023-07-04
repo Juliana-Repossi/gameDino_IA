@@ -9,7 +9,7 @@ pygame.init()
 
 # Valid values: HUMAN_MODE or AI_MODE
 GAME_MODE = "AI_MODE"
-RENDER_GAME = False
+RENDER_GAME = True
 
 # Global Constants
 SCREEN_HEIGHT = 600
@@ -370,21 +370,29 @@ class alg_genetic:
         #inicializa um vetor inicial com valores aleatórios e valores bons ja encontrados
         list_weights = np.random.randint(-1000, 1000, (self.qtd_generation,self.size))
 
-[ 312  146  -83  647 -672  965  536  -47  -24  688  663  867  586  461
- -656  908 -587  -17  919  125]
-
-[ 312  147  -83  647 -672  965  536  -47  -24  688  662  867  586  461
- -656  908 -587  -17  919  125]
- [ 368   41 -297  149 -623 -632  711  378  453 -975 -816 -739 -459 -604
- -324 -674 -764   35 -735 -864]
-
-
-[-346   30  367  357 -103  107  733  907 -585 -169  458  776 -171  235
-  -57  598  781  931 -400 -549]
+        [-346   30  367  357 -103  107  733  907 -585 -169  458  776 -171  235   -57  598  781  931 -400 -549]
+        [-346   30  367  357 -103  107  733  907 -585 -169  458  776 -171  235   -57  598  781  931 -400 -549]
+        [-346   30  367  357 -103  107  733  907 -585 -169  458  776 -171  235   -57  598  781  931 -400 -549]
+        [-347   30  367  357 -104  108  733  907 -584 -169  458  776 -171  235   -57  598  781  930 -399 -548]
+        [ 390 -880 -565  396  447  367  735 -809  452  381 -892 -744 -461 -604  -325 -671 -764   31 -737 -865]
+        [-345   31  367  357 -103  106  733  906 -586 -169  458  776 -170  235   -56  598  780  931 -400 -549]
+        [-346   30  366  357 -102  107  733  905 -585 -169  458  778 -170  234   -56  600  782  932 -401 -549]
 
 
 
-        
+
+
+
+
+        row = np.array([-346,   30,  367,  357, -103,  107,  733,  907, -585, -169 , 458, 776, -171, 235,  -57,  598,  781,  931, -400, -549])
+        list_weights = np.r_[list_weights,[row]]
+
+        row = np.array( [ 368,   41, -297,  149, -623, -632,  711,  378,  453, -975, -816, -739, -459, -604,  -324, -674, -764,   35, -735, -864])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([ 312,  147,  -83,  647, -672,  965,  536,  -47,  -24,  688,  662,  867,  586,  461,  -656,  908, -587,  -17,  919,  125])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([ 312,  146,  -83,  647, -672,  965,  536,  -47,  -24,  688,  663,  867,  586, 461,  -656,  908, -587,  -17,  919,  125])
+        list_weights = np.r_[list_weights,[row]]
 
         row = np.array([ 390, -880, -570,  396,  437,  377,  730, -809,  452,  381, -892, -739, -466, -604,  -325, -671, -764,   36, -727, -860])
         list_weights = np.r_[list_weights,[row]]
@@ -408,6 +416,31 @@ class alg_genetic:
         
 
 
+        row = np.array([-348,   30,  367,  357, -103,  107,  733,  907, -585, -169 , 458, 776, -171, 235,  -57,  598,  781,  931, -400, -549])
+        list_weights = np.r_[list_weights,[row]]
+
+        row = np.array( [ 368,   41, -297,  149, -624, -632,  711,  375,  453, -975, -816, -739, -459, -604,  -324, -674, -764,   35, -735, -864])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([ 312,  147,  -83,  647, -672,  965,  536,  -47,  -24,  688,  662,  867,  586,  461,  -656,  908, -587,  -17,  919,  125])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([ 322,  146,  -83,  647, -672,  965,  536,  -47,  -24,  788,  663,  867,  586, 461,  -656,  908, -587,  -17,  919,  125])
+        list_weights = np.r_[list_weights,[row]]
+
+        row = np.array([ 390, -880, -570,  396,  437,  377,  730, -809,  452,  381, -892, -739, -466, -604,  -375, -671, -764,   36, -727, -860])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([ 312,  146,  -83,  647, -672,  965,  236,  -47,  -24,  688,  663,  867,  586,  461, -656,  908, -587,  -57,  919,  125])
+        list_weights = np.r_[list_weights,[row]]
+
+        row = np.array([ 269,   41, -297,  146, -625, -633,  711,  378,  452, -974, -815, -739, -456, -604, -325, -676, -764,   36, -737, -865])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([ 449,  303, -183,  473,  701, -213, -584,  127, -334, -976, -555, -871,  220,   41, -357,   58,  922, -811, -430, -677])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([ 390, -880, -565,  396,  447,  387,  735, -809,  452,  381, -892, -744, -461, -604, -325, -671, -764,   31, -737, -835])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([ 390, -885, -570,  296,  452,  372,  725, -819,  453,  381, -892, -739, -461, -604, -325, -671, -764,   26, -742, -870])
+        list_weights = np.r_[list_weights,[row]]
+        row = np.array([ 390, -885, -570,  396,  452,  372,  725, -819,  452,  381, -892, -739, -461, -604, -325, -671, -764,   26, -742, -870])
+        list_weights = np.r_[list_weights,[row]]
 
         # row = np.array([-5264529, 2188768, -6233736,  1470275, -8670251 , -523549 , 4247573 , 3148315, -6316324 , 8113978, 8175472,  4046867 , -648623, -1676009, -8545026 , 3754160, -7028417,  1664271 , 5357543, -2023939])
         # list_weights = np.r_[list_weights,[row]]
@@ -628,6 +661,9 @@ def playGame(solutions):
                     nextObHeight = obstacles[1].getHeight()
                     nextObType = obstacles[1]
 
+                if distance < 0:
+                    distance = 0;
+
                 #aplicar transformação de valor nominal para ordinal no obType            
                 if isinstance(obType, Bird) and obHeight > 40:
                     userInput = players_classifier[i].keySelector(distance, obHeight, game_speed, -700)
@@ -714,7 +750,7 @@ def manyPlaysResultsTest(rounds,best_solution):
 def main():
 
     #inicializando a heurística (size,max_iter,qtd_gerac,selecao,crossfit,mutação)
-    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 2000, 5000, 0.2, 0.9, 0.9)
+    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 5000, 50, 0.2, 0.9, 0.9)
     meta_alg_genetic.metaheuristica_genetic()
     print(meta_alg_genetic.best_score)
     print(meta_alg_genetic.best_weights)
