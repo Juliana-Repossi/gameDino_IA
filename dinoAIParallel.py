@@ -228,8 +228,7 @@ class alg_genetic:
         self.size = size
         self.max_iter = max_iter
         self.qtd_generation = qtd_generation
-        # self.time_max = 43200 #12 horas
-        self.time_max = 33000 # 9 h
+        self.time_max = 43200 #12 horas
            
         self.percent_selection = percent_selection
         self.percent_cross = percent_cross
@@ -343,10 +342,9 @@ class alg_genetic:
         
         r = random.uniform(0,1)
         if r > 0.5:
-            copy_weights[rand] = copy_weights[rand] + 1
+            copy_weights[rand] = copy_weights[rand] + 5
         else:
-            copy_weights[rand] = copy_weights[rand] - 1
-                    
+            copy_weights[rand] = copy_weights[rand] - 5                 
         return copy_weights
 
     def mutation_weights (self, list_weights):
@@ -374,42 +372,10 @@ class alg_genetic:
         
 
         bons =  np.array([
-        [ 511 , 360 , 481 ,  79 ,-174,  102,  243,  942,  668,  296, -647, -713 ,-97 ,  71, -403,  151,  788,  -48 ,-769 ,-615],
-        [ 521,  350 , 481 ,-101,  -34,   62,  233,  932,  678,  336, -657, -603, -107,  -19, -463,   51,  788 ,   2 ,-779 ,-632],
-        [ 511,  363,  481, -118,  -24,  202,  193,  959,  668,  329, -597, -663,  -97,  18, -350,  141,  778,  -48 ,-762, -638],
-        [ 508,  366,  428,  179, -174,   66,  196,  692,  668,  296 ,-797, -813,  -97,   74,  -453,  148,  788,  -54 ,-769, -622],
-        [ 511,  360,  484, -115,  -24,   92,  220,  959,  668,  329, -597, -663,  -97,   18, -350,  141,  778,  -48, -762, -638],
-        [ 508,  366,  428,  179, -174,   66,  196,  692,  668,  296, -797, -813,  -97,   74, -453,  148,  788,  -54, -769, -622],
-        [ 511,  360,  481, -121,  -24,  202,  193,  892,  668,  346, -597, -613,  -97,   21, -553,  151,  788,   52, -769 ,-622],
-        [ 511,  370,  401,   -1, -194,  162,  223,  962,  668,  326, -637, -663,  -97, 1, -433,  181, 798,  -58, -779, -622],
-        [ 511,  360 , 431,   29 ,-124,   52 , 193 , 892,  668 , 296, -597 ,-663 , -97,   21 , -403 , 151 , 788,  -48 ,-769 ,-572],
-        [ 511,  360,  481,  79, -174,  102 , 243 , 942 , 668,  296, -647 ,-713 , -97 ,  71 , -403,  151 , 788 , -48, -769 ,-615],
-        [ 511,  360,  431 , -21,  -74 , 202,  193 , 892 , 668 , 346 ,-797 ,-763,  -97 ,  21 , -353 ,  51 , 788 ,   2 ,-769 ,-622],
-        [ 511 , 360 , 481 ,-121 , -24,  202 , 193 , 892,  668 , 346 ,-597, -613,  -97 ,  21 , -553 , 151 , 788 ,  52 ,-769 ,-622],
-        [ 511 , 360,  481 ,-121,  -24,  202 , 193,  892,  668 , 346 ,-597 ,-613 , -97 ,  21 , -553 , 151 , 788 ,  52 ,-769 ,-622],
-        [ 511 , 360,  331,  179 , -74 , 202  ,343 , 842 , 668 , 296 ,-797, -813 , -97  , 71 , -453 ,  51,  788 ,   2 ,-769, -622],
-        [ 511 , 360,  431 ,-121  , 26 , -48 ,  43 , 692 , 668 , 296 ,-797, -463  ,-97,  -29  ,-453  ,-99 , 788 ,   2 ,-769 ,-572],
-        [ 511,  360,  361 ,  29, -174  , 72 , 193 , 942 , 668 , 306, -597, -673, -107  , 21 , -413 , 151 , 778 , -38, -779 ,-622],
-        [ 511,  370,  371 ,  29, -164 ,  92 , 183 , 932 , 668 , 296, -597, -663 , -97 ,  31 , -403 , 141 , 778 , -48, -759 ,-632],
-        [ 511 , 360 , 381 ,  39, -174 , 122 , 183 , 942 , 668 , 306, -577 ,-673 , -97  , 31  ,-423 , 141 , 778 , -68, -759 ,-622],
-        [ 511,  360 , 421 ,  69, -184 ,  82 , 233 , 942,  668 , 306 ,-647 ,-653 ,-107  , 41 , -423 , 181 , 788 , -28, -769 ,-582],
-        [ 511 , 370,  401 ,  -1, -194 , 162 , 223 , 962 , 668 , 326 ,-637 ,-663 , -97  ,  1  ,-433  ,181 , 798 , -58 ,-779 ,-622],
-        [-346   ,30  ,366  ,357 ,-102 , 107 , 733  ,905, -585, -169  ,458  ,778 ,-170 , 234  , -56 , 600  ,782  ,932 ,-401, -549],
-        [-345  , 31 , 367 , 357, -103 , 106 , 733 , 906, -586, -169 , 458 , 776 ,-170,  235 ,  -56,  598 , 780 , 931, -400, -549],
-        [ 390 ,-880 ,-565  ,396 , 447  ,367,  735, -809 , 452,  381, -892, -744, -461, -604  ,-325, -671, -764,   31 ,-737 ,-865],
-        [-347 ,  30  ,367 , 357, -104  ,108 , 733  ,907 ,-584 ,-169,  458  ,776, -171  ,235 ,  -57,  598  ,781  ,930, -399, -548],
-        [-346 ,  30 , 367 , 357 ,-103 , 107,  733 , 907, -585, -169 , 458 , 776 ,-171 , 235 ,  -57 , 598 , 781 , 931 ,-400, -549],
-        [-346,   30,  367,  357, -103,  107,  733,  907, -585, -169,  458,  776, -171,  235,   -57,  598,  781,  931, -400 ,-549],
-        [-346,   30,  367,  357, -103,  107,  733,  907, -585, -169,  458,  776, -171,  235,   -57,  598,  781,  931, -400 ,-549],
-        [-346,   30,  367,  357, -103,  107,  733,  907, -585, -169,  458,  776, -171,  235,   -57 , 598 , 781 , 931, -400, -549],
-        [-346,   30,  367,  357, -103,  107,  733,  907, -585, -169 , 458, 776, -171, 235,  -57,  598,  781,  931, -400, -549],
-        [-449, -400,  682,  905, -947,  496, -682,  606, -321,  844,  739,  999, -296,  232, -901, -135, 641, -240,  642, -665],
-        [-449, -400,  682,  900, -942,  496, -692,  606,  -88, -403, -463,  96, -546, -600, -804,  923,  914,   59,  455, -848],
-        [ 312,  147,  -83,  647, -672,  965,  536,  -47,  -24,  688,  662,  867,  586,  461,  -656,  908, -587,  -17,  919,  125],
-        [ 511,  360,  381,  29, -174,   52,  193,  942,  668,  296, -597, -663, -97,   21, -403,  151,  788,  -48, -769, -622],
-        [ 312,  146,  -83,  647, -672,  965,  536,  -47,  -24,  688,  663,  867,  586, 461,  -656,  908, -587,  -17,  919,  125],
-        [ 511,  360,  381,  29, -174,   102,  193,  942,  668,  296, -597, -663, -97,   21, -403,  151,  788,  -48, -769, -622],
-        [ 390, -880, -570,  396,  437,  377,  730, -809,  452,  381, -892, -739, -466, -604,  -325, -671, -764,   36, -727, -860]
+        [  531 ,  385 ,  433 ,   69 ,   24  , -47  , 188 ,  722,   668 ,  306,  -787 ,-1121,  -122  ,  56  ,-448  , 191  , 778   , -8  ,-789  ,-542],
+        [ 501,  535,  708,  394,  201 , 362,  438,  852,  663,  511, -577 ,-268 ,  78,  376, -163,  436,  858,  227, -764, -282],
+        [  511 ,  385,   468, 49  ,   9  , -72 ,  208 ,  702 ,  668 ,  311,  -787, -1146,  -112 ,   61 , -418 ,  216,   788 ,   -8  ,-779 , -587],
+        [  511 ,  385,   468, 49  ,   9  , -72 ,  208 ,  702 ,  668 ,  311,  -787, -1146,  -112 ,   61 , -418 ,  216,   788 ,   -8  ,-779 , -587]   
         ])
 
         list_weights = np.concatenate((bons,list_weights))       
@@ -423,32 +389,32 @@ class alg_genetic:
             score = []
             results = []
 
-            score = playGame(list_weights)
+            score = manyPlaysResultsTrain(3,list_weights)
          
             for weights in list_weights:
                 
                 #concatenar resultado e pesos
                 results += [(score[i],weights)]
                 i +=1
-
-            #print(results)
             
             #porcentagem da população com os melhores valores 
             elite, best_score, best_weights = self.elitism(results)
             #adicionar o melhor da geração ao grafico
             self.graphic += [best_score]
 
+            print(best_score)
+
             #guarda os melhores valores
             if (best_score > self.best_score):
-                print('\nbest_score\n')
+                print('\n new best_score\n')
                 print(best_score)
-                print('\nbest_weights\n')
+                print('\n new best_weights\n')
                 print(best_weights)
                 self.best_score = best_score
                 self.best_weights = best_weights
 
             # faz a seleção
-            selections = self.selection(results, self.qtd_generation - len(elite))
+            selections = self.selection(results, len(list_weights) - len(elite))
             # faz o cross over 
             crossed = self.crossover_weights(selections)
             #aplica mutação
@@ -468,6 +434,7 @@ class KeySimplestClassifier(KeyClassifier):
 
         valor_neuronios = []
         result = 0
+        i=0
         
         #implementação de redes neurais
         for i in range(self.neuronios):
@@ -586,6 +553,7 @@ def playGame(solutions):
                     nextObDistance = nextxy[0]
                     nextObHeight = obstacles[1].getHeight()
                     nextObType = obstacles[1]
+                    
 
 
                 #aplicar transformação de valor nominal para ordinal no obType            
@@ -674,17 +642,20 @@ def manyPlaysResultsTest(rounds,best_solution):
 def main():
 
     #inicializando a heurística (size,max_iter,qtd_gerac,selecao,crossfit,mutação)
-    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 100000, 50000, 0.2, 0.9, 0.9)
+    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 100000, 10000 , 0.2, 0.9, 0.8)
 
     #fase de aprendizado
     meta_alg_genetic.metaheuristica_genetic()
+
+
+    print("\n\n ---------- Resultado final ----------- \n\n")
+    print(" \n ---------- Melhor Pontuação ----------- \n")
     print(meta_alg_genetic.best_score)
+    print("\n ---------- Melhor Array de Pesos ----------- \n")
     print(meta_alg_genetic.best_weights)
-
-
-    print("---------- Resultado final -----------")
     res, value = manyPlaysResultsTest(30, meta_alg_genetic.best_weights)
     npRes = np.asarray(res)
+    print("\n ---------- Resultados ----------- \n")
     print(res, npRes.mean(), npRes.std(), value)
 
 main()
