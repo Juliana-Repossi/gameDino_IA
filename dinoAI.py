@@ -370,12 +370,8 @@ class alg_genetic:
 
         global aiPlayer
 
-        #inicializa um vetor inicial com valores aleatórios e valores bons ja encontrados
+        #inicializa um vetor inicial com valores aleatórios
         list_weights = np.random.randint(-1000, 1000, (self.qtd_generation,self.size))
-        
-        row = np.array([  531 ,  385 ,  433 ,   69 ,   24  , -47  , 188 ,  722,   668 ,  306,  -787 ,-1121,  -122  ,  56  ,-448  , 191  , 778   , -8  ,-789  ,-542])
-        list_weights = np.r_[list_weights,[row]]
-        
         
         #verificar a convergencia
         conv = self.convergent(list_weights)
@@ -397,14 +393,14 @@ class alg_genetic:
             #adicionar o melhor da geração ao grafico
             self.graphic += [best_score]
 
-            print(best_score)
+            #print(best_score)
 
             #guarda os melhores valores
             if (best_score > self.best_score):
-                print('\n new best_score\n')
-                print(best_score)
-                print('\n new best_weights\n')
-                print(best_weights)
+                # print('\n new best_score\n')
+                # print(best_score)
+                # print('\n new best_weights\n')
+                # print(best_weights)
                 self.best_score = best_score
                 self.best_weights = best_weights
 
@@ -590,8 +586,6 @@ def playGame():
                 death_count += 1
                 return points
 
-
-
 # roda o jogo varias vezes para medir o resultado
 def manyPlaysResults(rounds):
     results = []
@@ -600,27 +594,100 @@ def manyPlaysResults(rounds):
     npResults = np.asarray(results)
     return (results, npResults.mean() - npResults.std())
 
+
+import pandas as pd
+from scipy import stats
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+#valores obtidos pelo agente inteligente do professor
+prof_result = [1214.0, 759.5, 1164.25, 977.25, 1201.0, 930.0, 1427.75,
+799.5, 1006.25, 783.5, 728.5, 419.25, 1389.5, 730.0, 1306.25, 675.5,
+1359.5, 1000.25, 1284.5, 1350.0, 751.0, 1418.75, 1276.5, 1645.75, 860.0,
+745.5, 1426.25, 783.5, 1149.75, 1482.25]
+
+
+def comparisonResults(resul_base, resul_real):
+
+    #colunas do dataFrame
+    columns = ['Média','Desvio Padrão']
+    for i in range(30):
+      columns += ['Iter' + str(i+1)]
+
+    #media e desvio
+    base = [np.mean(resul_base),np.std(resul_base)] + resul_base
+    real = [np.mean(resul_real),np.std(resul_real)] + resul_real
+
+    df = pd.DataFrame([base,real], columns=columns)
+    df.index = ['Base','Real']
+
+    print(df.transpose())
+
+    return df
+
+
+def testesTW(base, real):
+
+  tt, pt = stats.ttest_ind(base,real)
+
+  tw, pw = stats.wilcoxon(base,real,method = 'approx')
+
+  df = pd.DataFrame([[pt , pw]], columns=['teste-T', 'teste-wilcoxon'])
+
+  print(df)
+
+  return df
+
+
+def boxPlot(base, real):
+
+    df = pd.DataFrame([base , real])
+    df.index = ['Base','Real']
+
+    sns.boxplot(data=df.transpose())
+
+    plt.show()
+
+
+def graf_evol(evol, numIter):
+
+    plt.plot(np.array(list(range(1, numIter+1))),np.array(evol))  
+    # Definir valores inteiros nos marcadores do eixo x
+    plt.xticks(range(1, numIter+1))
+    plt.xlabel("Iteração")  
+    plt.ylabel("Melhor Pontuação")  
+    plt.title("Evolução scores")  
+    plt.show()  
+
+
 def main():
 
     #inicializando a heurística (size,max_iter,qtd_gerac,selecao,crossfit,mutação)
-    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 200, 1, 0.2, 0.9, 0.2)
+    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 1000, 500, 0.2, 0.9, 0.8)
     
     #fase de aprendizagem
     meta_alg_genetic.metaheuristica_genetic()
     
+    #evolução do aprendizado
+    graf_evol(meta_alg_genetic.graphic, meta_alg_genetic.max_iter)
 
-
-    print("\n\n ---------- Resultado final ----------- \n\n")
-    print(" \n ---------- Melhor Pontuação ----------- \n")
-    print(meta_alg_genetic.best_score)
-    print("\n ---------- Melhor Array de Pesos ----------- \n")
-    print(meta_alg_genetic.best_weights)
-
+    #teste do agente
     global aiPlayer
     aiPlayer = KeySimplestClassifier(meta_alg_genetic.best_weights)
     res, value = manyPlaysResults(30)
-    npRes = np.asarray(res)
-    print("\n ---------- Resultados ----------- \n")
-    print(res, npRes.mean(), npRes.std(), value)
+
+    #resultados
+    print('\n\n ----------------- Tabela de Valores ----------------- \n\n')
+
+    # media , desvio , valores
+    df_val = comparisonResults(prof_result,res)
+
+    print('\n\n ----------------- Tabela de Testes ----------------- \n\n')
+
+    # t test e test de wilcoxon
+    df_test = testesTW(prof_result,res)
+
+    boxPlot(prof_result,res)
 
 main()
