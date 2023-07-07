@@ -343,9 +343,9 @@ class alg_genetic:
         
         r = random.uniform(0,1)
         if r > 0.5:
-            copy_weights[rand] = copy_weights[rand] + 10
+            copy_weights[rand] = copy_weights[rand] + 1
         else:
-            copy_weights[rand] = copy_weights[rand] - 10   
+            copy_weights[rand] = copy_weights[rand] - 1
         return copy_weights
 
     def mutation_weights (self, list_weights):
@@ -394,7 +394,7 @@ class alg_genetic:
             #adicionar o melhor da geração ao grafico
             self.graphic += [best_score]
 
-            #print(best_score)
+            print(best_score)
 
             #guarda os melhores valores
             if (best_score > self.best_score):
@@ -704,6 +704,9 @@ def main():
 
     #fase de aprendizado
     meta_alg_genetic.metaheuristica_genetic()
+
+    print('\n\n ----------------- Melhores Pesos ----------------- \n\n')
+    print(meta_alg_genetic.best_weights)
 
     #evolução do aprendizado
     graf_evol(meta_alg_genetic.graphic, meta_alg_genetic.max_iter)

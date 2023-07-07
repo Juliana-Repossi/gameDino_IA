@@ -668,6 +668,9 @@ def main():
     
     #fase de aprendizagem
     meta_alg_genetic.metaheuristica_genetic()
+
+    print('\n\n ----------------- Melhores Pesos ----------------- \n\n')
+    print(meta_alg_genetic.best_weights)
     
     #evolução do aprendizado
     graf_evol(meta_alg_genetic.graphic, meta_alg_genetic.max_iter)
