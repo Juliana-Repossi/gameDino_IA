@@ -342,9 +342,9 @@ class alg_genetic:
         
         r = random.uniform(0,1)
         if r > 0.5:
-            copy_weights[rand] = copy_weights[rand] + 1
+            copy_weights[rand] = copy_weights[rand] + 5
         else:
-                copy_weights[rand] = copy_weights[rand] - 1
+                copy_weights[rand] = copy_weights[rand] - 5
                     
         return copy_weights
 

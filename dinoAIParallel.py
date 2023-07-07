@@ -700,7 +700,7 @@ def graf_evol(evol, numIter):
 def main():
 
     #inicializando a heurística (size,max_iter,qtd_gerac,selecao,crossfit,mutação)
-    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 1000000,10000 , 0.2, 0.9, 0.9)
+    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 1000000, 10000, 0.2, 0.9, 0.9)
 
     #fase de aprendizado
     meta_alg_genetic.metaheuristica_genetic()
