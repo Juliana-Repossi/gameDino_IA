@@ -230,6 +230,7 @@ class alg_genetic:
         self.max_iter = max_iter
         self.qtd_generation = qtd_generation
         self.time_max = 43200 #12 horas
+        self.real_iter = 0
            
         self.percent_selection = percent_selection
         self.percent_cross = percent_cross
@@ -393,6 +394,7 @@ class alg_genetic:
             elite, best_score, best_weights = self.elitism(results)
             #adicionar o melhor da geração ao grafico
             self.graphic += [best_score]
+            self.real_iter +=1
 
             print(best_score)
 
@@ -696,11 +698,12 @@ def graf_evol(evol, numIter):
     plt.title("Evolução scores")  
     plt.show()  
 
+resultado_juliana = [ 273, -263,  342 , 658 , 4, 381, -620,  591, -225, -734, -866, 26, 234, 255, -52, -676, 78, -301, -380, -546]
 
 def main():
 
     #inicializando a heurística (size,max_iter,qtd_gerac,selecao,crossfit,mutação)
-    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 1000000, 10000, 0.2, 0.9, 0.9)
+    meta_alg_genetic = alg_genetic(N_NEURONIOS**2 + N_NEURONIOS, 15000, 5000, 0.2, 0.9, 0.5)
 
     #fase de aprendizado
     meta_alg_genetic.metaheuristica_genetic()
@@ -709,7 +712,7 @@ def main():
     print(meta_alg_genetic.best_weights)
 
     #evolução do aprendizado
-    graf_evol(meta_alg_genetic.graphic, meta_alg_genetic.max_iter)
+    graf_evol(meta_alg_genetic.graphic, meta_alg_genetic.real_iter)
 
     #teste do agente
     res, value = manyPlaysResultsTest(30, meta_alg_genetic.best_weights)
